@@ -1,0 +1,126 @@
+<html>
+<head lang="ch">
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <script src="assets/fabric.min.js"></script>
+    <!--<script src="https://cdn.jsdelivr.net/npm/vue"></script>-->
+    <script src="https://vuejs.org/js/vue.js"></script>
+    <link rel="stylesheet" href="assets/bootstrap.min.css">
+    <style>
+
+        body {
+            text-align: center;
+        }
+
+        .channel-choose img {
+            width: 100%;
+            height: 0.5rem;
+        }
+
+        .control-btn {
+            width: 1.5rem;
+            vertical-align: middle;
+            font-size: .6rem;
+            line-height: .2rem;
+            color: yellow;
+            height: 0.6rem;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-4 col-sm-offset-4">
+            <button class=" control-btn btn btn-success">&bigtriangleup;</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-4">
+            <button class="control-btn btn btn-success">&triangleleft;</button>
+        </div>
+        <div class="col-sm-4">
+            <button class=" control-btn btn btn-warning">&bigcirc;</button>
+        </div>
+        <div class="col-sm-4">
+            <button class=" control-btn btn btn-success">&triangleright;</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-4 col-sm-offset-4">
+            <button class=" control-btn btn btn-success">&bigtriangledown;</button>
+        </div>
+
+    </div>
+    <p data-action="iconPicker"></p>
+
+
+    <div class="container" id="channels">
+        <div class="row channel-choose">
+            <div :id="channel.channelid" class="col-sm-2" v-for="(channel,index) in channels">
+                <img :src="channel.src" :alt="channel.label" @click="changeChannel(channel.channelid)"/>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+<script src="assets/jquery-3.3.1.min.js"></script>
+<script src="assets/jquery.jsonrpc.js"></script>
+
+<script>
+    var host = "172.168.1.200";
+    var requestJson = {
+        "jsonrpc": "2.0",
+        "method": "PVR.GetChannels",
+        "params": {"channelgroupid": 1},
+        id: Math.random()
+    };
+
+
+    $(document).ready(function () {
+        $.ajax({
+            url: 'http://172.168.1.200:8080/jsonrpc?request=' + JSON.stringify(requestJson),
+            type: "get",
+            dataType: "jsonp",
+            success: function (rs) {
+                app.channels = rs.result.channels;
+            }
+        })
+    })
+</script>
+
+<script>
+
+    var open = {
+        "jsonrpc": "2.0",
+        "method": "Player.Open",
+        "params": {item: {channelid: -1}},
+        id: Math.random()
+    };
+
+    var app = new Vue({
+        el: '#channels',
+        data: {
+            channels: []
+        },
+        methods: {
+            changeChannel: function (data) {
+                open.params.item.channelid = data;
+                $.ajax({
+                    url: 'http://172.168.1.200:8080/jsonrpc?request=' + JSON.stringify(open),
+                    type: "get",
+                    dataType: "jsonp",
+                    success: function (rs) {
+                        console.log(rs)
+                    }
+                })
+            }
+        }
+    })
+
+
+</script>
+
+</html>
