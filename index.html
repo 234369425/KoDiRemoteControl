@@ -11,11 +11,12 @@
 
         body {
             text-align: center;
+            background: radial-gradient(#58914a, rgba(45, 33, 56, 0.99),#2c412b);
         }
 
         .channel-choose {
             font-size: 0.45rem;
-            color: blue;
+            color: #dbff77;
         }
 
         .channel-choose img {
@@ -39,7 +40,9 @@
 <body>
 <div class="container" id="main">
     <div class="row text-right">
-        <i style="font-family: 'STXingkai'">KoDi: V{{version.major+'.'+version.minor}} Aladdin&nbsp;&nbsp;</i>
+        <b style="font-family: 'STXingkai';font-size:large;color:orange">
+            KoDi: V{{version.major+'.'+version.minor}} Aladdin&nbsp;&nbsp;
+        </b>
     </div>
     <div class="row">
         <div class="col-xs-3">
@@ -48,7 +51,7 @@
             </button>
         </div>
         <div class="col-xs-3 col-xs-offset-6 text-center">
-            <button class="btn btn-lg btn-primary" onclick="exec('Input.Back')">
+            <button class="btn btn-lg btn-danger" onclick="exec('Input.Back')">
                 <i class="glyphicon glyphicon-off"></i>
             </button>
         </div>
