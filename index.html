@@ -13,53 +13,119 @@
             text-align: center;
         }
 
+        .channel-choose {
+            font-size: 0.45rem;
+            color: blue;
+        }
+
         .channel-choose img {
-            width: 100%;
-            height: 0.5rem;
+            width: 90%;
+            height: 2rem;
+            margin-top: 0.2rem;
         }
 
         .control-btn {
-            width: 1.5rem;
+            width: 1.8rem;
             vertical-align: middle;
             font-size: .6rem;
             line-height: .2rem;
             color: yellow;
-            height: 0.6rem;
+            height: 1.2rem;
+            margin: .25rem;
         }
     </style>
 </head>
 
 <body>
-<div class="container">
+<div class="container" id="main">
+    <div class="row text-right">
+        <i style="font-family: 'STXingkai'">KoDi: V{{version.major+'.'+version.minor}} Aladdin&nbsp;&nbsp;</i>
+    </div>
     <div class="row">
-        <div class="col-sm-4 col-sm-offset-4">
-            <button class=" control-btn btn btn-success" onclick="inputs('Input.Up')">&bigtriangleup;</button>
+        <div class="col-xs-3">
+            <button class="btn btn-lg btn-danger" onclick="exec('Application.SetVolume',{volume:0})">
+                <i class="glyphicon glyphicon-volume-off"></i>
+            </button>
+        </div>
+        <div class="col-xs-3 col-xs-offset-6 text-center">
+            <button class="btn btn-lg btn-primary" onclick="exec('Input.Back')">
+                <i class="glyphicon glyphicon-off"></i>
+            </button>
         </div>
     </div>
     <div class="row">
-        <div class="col-sm-4">
-            <button class="control-btn btn btn-success" onclick="inputs('Input.Left')">&triangleleft;</button>
-        </div>
-        <div class="col-sm-4">
-            <button class=" control-btn btn btn-warning">&bigcirc;</button>
-        </div>
-        <div class="col-sm-4">
-            <button class=" control-btn btn btn-success" onclick="inputs('Input.Right')">&triangleright;</button>
+        <div class="col-xs-3 col-xs-offset-4">
+            <button class=" control-btn btn btn-success" onclick="exec('Input.Up')">
+                <i class="glyphicon glyphicon-triangle-top"></i>
+            </button>
         </div>
     </div>
     <div class="row">
-        <div class="col-sm-4 col-sm-offset-4">
-            <button class=" control-btn btn btn-success" onclick="inputs('Input.Down')">&bigtriangledown;</button>
+        <div class="col-xs-3 col-xs-offset-1 right">
+            <button class="control-btn btn btn-success" onclick="exec('Input.Left')">
+                <i class="glyphicon glyphicon-triangle-left"></i>
+            </button>
         </div>
-
+        <div class="col-xs-3">
+            <button class=" control-btn btn btn-warning" onclick="exec('Input.Select')">&bigcirc;</button>
+        </div>
+        <div class="col-xs-3 left">
+            <button class=" control-btn btn btn-success" onclick="exec('Input.Right')">
+                <i class="glyphicon glyphicon-triangle-right"></i>
+            </button>
+        </div>
     </div>
-    <p data-action="iconPicker"></p>
+    <div class="row">
+        <div class="col-xs-3 col-xs-offset-4">
+            <button class=" control-btn btn btn-success" onclick="exec('Input.Down')">
+                <i class="glyphicon glyphicon-triangle-bottom"></i>
+            </button>
+        </div>
+    </div>
 
+    <div class="row">
+        <div class="col-xs-3">
+            <button class="btn btn-lg btn-primary" onclick="exec('Input.ContextMenu')">
+                <i class="glyphicon glyphicon-menu-hamburger"></i>
+            </button>
+        </div>
+        <div class="col-xs-3 col-xs-offset-6 text-center">
+            <button class="btn btn-lg btn-primary" onclick="exec('Input.Back')">
+                <i class="glyphicon glyphicon-share-alt"></i>
+            </button>
+        </div>
+    </div>
 
-    <div class="container" id="channels">
+    <div class="row">
+        <hr/>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-2">
+            <button class="btn btn-sm btn-warning" onclick="volume('minus')">
+                <i class="glyphicon glyphicon-volume-down"></i>
+            </button>
+        </div>
+        <div class="col-xs-8">
+            <div class="progress">
+                <div class="progress-bar progress-bar-success" role="progressbar" :aria-valuenow="volume"
+                     aria-valuemin="0" aria-valuemax="100" :style="{width:volume+'%'}">
+                    {{volume}}%
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-2">
+            <button class="btn btn-sm btn-warning" onclick="volume('plus')">
+                <i class="glyphicon glyphicon-volume-up"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="container">
         <div class="row channel-choose">
-            <div :id="channel.channelid" class="col-sm-2" v-for="(channel,index) in channels">
-                <img :src="channel.icon" :alt="channel.label" @click="changeChannel(channel.channelid)"  class="img-thumbnail"/>
+            <div :id="channel.channelid" class="col-sm-2 col-xs-6" v-for="(channel,index) in channels"
+                 @click="changeChannel(channel.channelid)">
+                <img :src="channel.icon" :alt="channel.label" class="img-thumbnail  img-circle"/>
                 <div>{{channel.label}}</div>
             </div>
         </div>
@@ -71,6 +137,9 @@
 <script src="assets/get.icon.js"></script>
 
 <script>
+
+    var host = "172.168.1.200:8080";
+    var id = 10000;
 
     var requestJson = {
         "jsonrpc": "2.0",
@@ -98,19 +167,47 @@
         })
     })
 
-    function inputs(name) {
+    function defaultSuccess(rs) {
+        console.log(rs)
+    }
+
+    function volume(opera) {
+        var currVol = app.volume;
+        switch (opera) {
+            case 'plus':
+                if (currVol >= 100) {
+                    return;
+                }
+                currVol += 5;
+                break;
+            case 'minus':
+                if (currVol <= 0) {
+                    return;
+                }
+                currVol -= 5;
+                break;
+        }
+
+        currVol = currVol < 0 ? 0 : currVol;
+        currVol = currVol > 100 ? 100 : currVol;
+        app.volume = currVol;
+        exec('Application.SetVolume', {volume: currVol}, function (rs) {
+            app.volume = isNaN(rs.result) ? app.volume : rs.result;
+        })
+    }
+
+    function exec(method, params, fn) {
         $.ajax({
-            url: 'http://172.168.1.200:8080/jsonrpc?request=' + JSON.stringify({
-                "jsonrpc": "2.0",
-                "method": name,
-                id: Math.random()
+            url: 'http://' + host + '/jsonrpc?request=' + JSON.stringify({
+                jsonrpc: "2.0",
+                method: method,
+                params: params,
+                id: id++
             }),
             type: "get",
             dataType: "jsonp",
-            success: function (rs) {
-                console.log(rs)
-            }
-        });
+            success: fn || defaultSuccess
+        })
     }
 </script>
 
@@ -124,9 +221,11 @@
     };
 
     var app = new Vue({
-        el: '#channels',
+        el: '#main',
         data: {
-            channels: []
+            channels: [],
+            volume: 100,
+            version: {}
         },
         methods: {
             changeChannel: function (data) {
@@ -140,6 +239,16 @@
                     }
                 })
             }
+        },
+        mounted() {
+            var _this = this;
+            exec("Application.GetProperties", {properties: ["volume", "muted", "version"]}, function (rs) {
+                console.log(rs)
+                if (!rs.error) {
+                    _this.volume = rs.result.volume;
+                    _this.version = rs.result.version;
+                }
+            })
         }
     })
 
