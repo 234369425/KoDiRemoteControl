@@ -11,7 +11,7 @@
 
         body {
             text-align: center;
-            background: radial-gradient(#58914a, rgba(45, 33, 56, 0.99),#2c412b);
+            background: radial-gradient(#58914a, rgba(45, 33, 56, 0.99), #2c412b);
         }
 
         .channel-choose {
@@ -46,12 +46,12 @@
     </div>
     <div class="row">
         <div class="col-xs-3">
-            <button class="btn btn-lg btn-danger" onclick="exec('Application.SetVolume',{volume:0})">
+            <button class="btn btn-lg btn-danger" @click="exec('Application.SetVolume',{volume:0})">
                 <i class="glyphicon glyphicon-volume-off"></i>
             </button>
         </div>
         <div class="col-xs-3 col-xs-offset-6 text-center">
-            <button class="btn btn-lg btn-danger" onclick="exec('Input.Back')">
+            <button class="btn btn-lg btn-danger" @click="exec('Input.Back')">
                 <i class="glyphicon glyphicon-off"></i>
             </button>
         </div>
@@ -65,22 +65,22 @@
     </div>
     <div class="row">
         <div class="col-xs-3 col-xs-offset-1 right">
-            <button class="control-btn btn btn-success" onclick="exec('Input.Left')">
+            <button class="control-btn btn btn-success" @click="exec('Input.Left')">
                 <i class="glyphicon glyphicon-triangle-left"></i>
             </button>
         </div>
         <div class="col-xs-3">
-            <button class=" control-btn btn btn-warning" onclick="exec('Input.Select')">&bigcirc;</button>
+            <button class=" control-btn btn btn-warning" @click="exec('Input.Select')">&bigcirc;</button>
         </div>
         <div class="col-xs-3 left">
-            <button class=" control-btn btn btn-success" onclick="exec('Input.Right')">
+            <button class=" control-btn btn btn-success" @click="exec('Input.Right')">
                 <i class="glyphicon glyphicon-triangle-right"></i>
             </button>
         </div>
     </div>
     <div class="row">
         <div class="col-xs-3 col-xs-offset-4">
-            <button class=" control-btn btn btn-success" onclick="exec('Input.Down')">
+            <button class=" control-btn btn btn-success" @click="exec('Input.Down')">
                 <i class="glyphicon glyphicon-triangle-bottom"></i>
             </button>
         </div>
@@ -88,12 +88,12 @@
 
     <div class="row">
         <div class="col-xs-3">
-            <button class="btn btn-lg btn-primary" onclick="exec('Input.ContextMenu')">
+            <button class="btn btn-lg btn-primary" @click="exec('Input.ContextMenu')">
                 <i class="glyphicon glyphicon-menu-hamburger"></i>
             </button>
         </div>
         <div class="col-xs-3 col-xs-offset-6 text-center">
-            <button class="btn btn-lg btn-primary" onclick="exec('Input.Back')">
+            <button class="btn btn-lg btn-primary" @click="exec('Input.Back')">
                 <i class="glyphicon glyphicon-share-alt"></i>
             </button>
         </div>
@@ -105,7 +105,7 @@
 
     <div class="row">
         <div class="col-xs-2">
-            <button class="btn btn-sm btn-warning" onclick="volume('minus')">
+            <button class="btn btn-sm btn-warning" @click="changeVolume('minus')">
                 <i class="glyphicon glyphicon-volume-down"></i>
             </button>
         </div>
@@ -118,7 +118,7 @@
             </div>
         </div>
         <div class="col-xs-2">
-            <button class="btn btn-sm btn-warning" onclick="volume('plus')">
+            <button class="btn btn-sm btn-warning" @click="changeVolume('plus')">
                 <i class="glyphicon glyphicon-volume-up"></i>
             </button>
         </div>
@@ -126,7 +126,7 @@
 
     <div class="container">
         <div class="row channel-choose">
-            <div :id="channel.channelid" class="col-sm-2 col-xs-6" v-for="(channel,index) in channels"
+            <div :id="channel.channelid" class="col-sm-4 col-xs-6" v-for="(channel,index) in channels"
                  @click="changeChannel(channel.channelid)">
                 <img :src="channel.icon" :alt="channel.label" class="img-thumbnail  img-circle"/>
                 <div>{{channel.label}}</div>
@@ -142,86 +142,11 @@
 <script>
 
     var host = "172.168.1.200:8080";
-    var id = 10000;
-
-    var requestJson = {
-        "jsonrpc": "2.0",
-        "method": "PVR.GetChannels",
-        "params": {"channelgroupid": 1},
-        id: Math.random()
-    };
-
-    $(document).ready(function () {
-        $.ajax({
-            url: 'http://172.168.1.200:8080/jsonrpc?request=' + JSON.stringify(requestJson),
-            type: "get",
-            dataType: "jsonp",
-            success: function (rs) {
-                var channel = rs.result.channels;
-
-                for (var i = 0; i < channel.length; i++) {
-                    channel[i].icon = (function (label) {
-                        return complement_tv_icon(label)
-                    })(channel[i].label);
-                }
-                console.log(channel.icon)
-                app.channels = channel;
-            }
-        })
-    })
+    var id = Math.random().toFixed(2) * 900 + 100;
 
     function defaultSuccess(rs) {
         console.log(rs)
     }
-
-    function volume(opera) {
-        var currVol = app.volume;
-        switch (opera) {
-            case 'plus':
-                if (currVol >= 100) {
-                    return;
-                }
-                currVol += 5;
-                break;
-            case 'minus':
-                if (currVol <= 0) {
-                    return;
-                }
-                currVol -= 5;
-                break;
-        }
-
-        currVol = currVol < 0 ? 0 : currVol;
-        currVol = currVol > 100 ? 100 : currVol;
-        app.volume = currVol;
-        exec('Application.SetVolume', {volume: currVol}, function (rs) {
-            app.volume = isNaN(rs.result) ? app.volume : rs.result;
-        })
-    }
-
-    function exec(method, params, fn) {
-        $.ajax({
-            url: 'http://' + host + '/jsonrpc?request=' + JSON.stringify({
-                jsonrpc: "2.0",
-                method: method,
-                params: params,
-                id: id++
-            }),
-            type: "get",
-            dataType: "jsonp",
-            success: fn || defaultSuccess
-        })
-    }
-</script>
-
-<script>
-
-    var open = {
-        "jsonrpc": "2.0",
-        "method": "Player.Open",
-        "params": {item: {channelid: -1}},
-        id: Math.random()
-    };
 
     var app = new Vue({
         el: '#main',
@@ -232,29 +157,73 @@
         },
         methods: {
             changeChannel: function (data) {
-                open.params.item.channelid = data;
+                this.exec("Player.Open", {item: {channelid: data}})
+            },
+            exec: function (method, params, fn) {
                 $.ajax({
-                    url: 'http://172.168.1.200:8080/jsonrpc?request=' + JSON.stringify(open),
+                    url: 'http://' + host + '/jsonrpc?request=' + JSON.stringify({
+                        jsonrpc: "2.0",
+                        method: method,
+                        params: params,
+                        id: id++
+                    }),
                     type: "get",
                     dataType: "jsonp",
-                    success: function (rs) {
-                        console.log(rs)
-                    }
+                    success: fn || defaultSuccess
                 })
+            },
+            changeVolume: function (opera) {
+                var _this = this;
+                var currVol = app.volume;
+                switch (opera) {
+                    case 'plus':
+                        currVol += 5;
+                        break;
+                    case 'minus':
+                        currVol -= 5;
+                        break;
+                }
+                if (currVol >= 100 || currVol <= 0) {
+                    return;
+                }
+                currVol = currVol < 0 ? 0 : currVol;
+                currVol = currVol > 100 ? 100 : currVol;
+                _this.volume = currVol;
+                _this.exec('Application.SetVolume', {volume: currVol}, function (rs) {
+                    _this.volume = isNaN(rs.result) ? _this.volume : rs.result;
+                })
+            },
+            init: function () {
+                let _this = this;
+                _this.exec("Application.GetProperties", {properties: ["volume", "muted", "version"]}, function (rs) {
+                    console.log('load properties', rs);
+                    if (!rs.error) {
+                        _this.volume = rs.result.volume;
+                        _this.version = rs.result.version;
+                    }
+                });
+                _this.exec("PVR.GetChannels", {"channelgroupid": 1}, function (rs) {
+                    var channel = rs.result.channels;
+                    for (var i = 0; i < channel.length; i++) {
+                        channel[i].icon = (function (label) {
+                            return complement_tv_icon(label)
+                        })(channel[i].label);
+                    }
+                    app.channels = channel;
+                });
             }
         },
         mounted() {
             var _this = this;
-            exec("Application.GetProperties", {properties: ["volume", "muted", "version"]}, function (rs) {
-                console.log(rs)
-                if (!rs.error) {
-                    _this.volume = rs.result.volume;
-                    _this.version = rs.result.version;
+            _this.exec("JSONRPC.Ping", {}, function (rs) {
+                if (rs.result === 'pong') {
+                    _this.init();
+                } else {
+
                 }
-            })
+            });
         }
     })
-
 
 </script>
 
