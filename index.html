@@ -58,7 +58,7 @@
     </div>
     <div class="row">
         <div class="col-xs-3 col-xs-offset-4">
-            <button class=" control-btn btn btn-success" onclick="exec('Input.Up')">
+            <button class=" control-btn btn btn-success" @click="exec('Input.Up')">
                 <i class="glyphicon glyphicon-triangle-top"></i>
             </button>
         </div>
@@ -183,7 +183,7 @@
                         currVol -= 5;
                         break;
                 }
-                if (currVol >= 100 || currVol <= 0) {
+                if (currVol > 100 || currVol < 0) {
                     return;
                 }
                 currVol = currVol < 0 ? 0 : currVol;
