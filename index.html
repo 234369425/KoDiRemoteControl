@@ -44,9 +44,9 @@
             KoDi: V{{version.major+'.'+version.minor}} Aladdin&nbsp;&nbsp;
         </b>
     </div>
-    <div class="alert alert-warning" role="alert">
-        连接KoDi rpc服务失败,请检查host Port是否正确：<br/>
-        Host Port: <input :value="host" @blur="ping"/>
+    <div v-if="changeVisible" class="alert alert-warning" role="alert">
+        连接服务器失败！请检查KiDo状态或者host port是否正确!<br/>
+        Host Port: <input :value="host" @blur="ping"/> <button @click="ping">Retry</button>
     </div>
     <div class="row">
         <div class="col-xs-3">
@@ -128,7 +128,7 @@
         </div>
     </div>
 
-    <div>
+    <div class="row">
         <hr/>
     </div>
 
@@ -158,6 +158,7 @@
             volume: 100,
             version: {},
             requestLocked: false,
+            changeVisible: false,
             host: "172.168.1.200:8080"
         },
         methods: {
@@ -172,7 +173,7 @@
                 var _this = this;
                 _this.requestLocked = false;
                 if (rs.statusText === "timeout") {
-
+                    _this.changeVisible = true;
                 }
             },
             exec: function (method, params, fn) {
@@ -194,6 +195,7 @@
                     dataType: "jsonp",
                     success: function (rs) {
                         _this.requestLocked = false;
+                        _this.changeVisible = false;
                         if (fn) {
                             fn(rs);
                         } else {
