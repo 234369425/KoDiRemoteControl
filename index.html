@@ -48,7 +48,7 @@
     </div>
     <div v-if="changeVisible" class="alert alert-warning" role="alert">
         连接服务器失败！请检查KiDo状态或者host port是否正确!<br/>
-        Host Port: <input :value="host" @blur="ping"/>
+        Host Port: <input @blur="ping" v-model="host"/>
         <button @click="ping">Retry</button>
     </div>
     <div class="row">
@@ -251,6 +251,7 @@
             },
             ping: function () {
                 var _this = this;
+                _this.changeVisible = false;
                 Lockr.set("hostport", _this.host);
                 _this.exec("JSONRPC.Ping", {}, function (rs) {
                     if (rs.result === 'pong') {
