@@ -44,6 +44,10 @@
             KoDi: V{{version.major+'.'+version.minor}} Aladdin&nbsp;&nbsp;
         </b>
     </div>
+    <div class="alert alert-warning" role="alert">
+        连接KoDi rpc服务失败,请检查host Port是否正确：<br/>
+        Host Port: <input :value="host" @blur="ping"/>
+    </div>
     <div class="row">
         <div class="col-xs-3">
             <button class="btn btn-lg btn-danger" @click="exec('Application.SetVolume',{volume:0})">
@@ -124,6 +128,10 @@
         </div>
     </div>
 
+    <div>
+        <hr/>
+    </div>
+
     <div class="container">
         <div class="row channel-choose">
             <div :id="channel.channelid" class="col-sm-4 col-xs-6" v-for="(channel,index) in channels"
@@ -141,35 +149,58 @@
 
 <script>
 
-    var host = "172.168.1.200:8080";
     var id = Math.random().toFixed(2) * 900 + 100;
-
-    function defaultSuccess(rs) {
-        console.log(rs)
-    }
 
     var app = new Vue({
         el: '#main',
         data: {
             channels: [],
             volume: 100,
-            version: {}
+            version: {},
+            requestLocked: false,
+            host: "172.168.1.200:8080"
         },
         methods: {
             changeChannel: function (data) {
                 this.exec("Player.Open", {item: {channelid: data}})
             },
+            defaultSuccess: function (rs) {
+                console.log(rs);
+            },
+            onError: function (rs) {
+                console.log(rs)
+                var _this = this;
+                _this.requestLocked = false;
+                if (rs.statusText === "timeout") {
+
+                }
+            },
             exec: function (method, params, fn) {
+                var _this = this;
+                //每次只使用一个请求
+                if (_this.requestLocked) {
+                    return;
+                }
+                _this.requestLocked = true;
                 $.ajax({
-                    url: 'http://' + host + '/jsonrpc?request=' + JSON.stringify({
+                    url: 'http://' + _this.host + '/jsonrpc?request=' + JSON.stringify({
                         jsonrpc: "2.0",
                         method: method,
                         params: params,
                         id: id++
                     }),
+                    timeout: 3000,
                     type: "get",
                     dataType: "jsonp",
-                    success: fn || defaultSuccess
+                    success: function (rs) {
+                        _this.requestLocked = false;
+                        if (fn) {
+                            fn(rs);
+                        } else {
+                            _this.defaultSuccess(rs);
+                        }
+                    },
+                    error: _this.onError
                 })
             },
             changeVolume: function (opera) {
@@ -194,7 +225,7 @@
                 })
             },
             init: function () {
-                let _this = this;
+                var _this = this;
                 _this.exec("Application.GetProperties", {properties: ["volume", "muted", "version"]}, function (rs) {
                     console.log('load properties', rs);
                     if (!rs.error) {
@@ -211,17 +242,20 @@
                     }
                     app.channels = channel;
                 });
+            },
+            ping: function () {
+                var _this = this;
+                _this.exec("JSONRPC.Ping", {}, function (rs) {
+                    if (rs.result === 'pong') {
+                        _this.init();
+                    } else {
+
+                    }
+                });
             }
         },
         mounted() {
-            var _this = this;
-            _this.exec("JSONRPC.Ping", {}, function (rs) {
-                if (rs.result === 'pong') {
-                    _this.init();
-                } else {
-
-                }
-            });
+            this.ping();
         }
     })
 
