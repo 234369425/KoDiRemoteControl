@@ -51,12 +51,13 @@
     </div>
     <div class="row">
         <div class="col-xs-3">
-            <button class="btn btn-lg btn-danger" @click="exec('Application.SetVolume',{volume:0})">
-                <i class="glyphicon glyphicon-volume-off"></i>
+            <button class="btn btn-lg btn-danger" @click="onMute">
+                <i class="glyphicon glyphicon-volume-off" v-if="muted"></i>
+                <i class="glyphicon glyphicon-volume-up" v-if="!muted"></i>
             </button>
         </div>
         <div class="col-xs-3 col-xs-offset-6 text-center">
-            <button class="btn btn-lg btn-danger" @click="exec('Input.Back')">
+            <button class="btn btn-lg btn-danger" @click="beforeShutdown">
                 <i class="glyphicon glyphicon-off"></i>
             </button>
         </div>
@@ -161,14 +162,25 @@
             version: {},
             requestLocked: false,
             changeVisible: false,
+            muted: false,
             host: "172.168.1.200:8080"
         },
         methods: {
             changeChannel: function (data) {
                 this.exec("Player.Open", {item: {channelid: data}})
             },
+            beforeShutdown: function () {
+                if (confirm("确定要关机么？")) {
+                    this.exec("System.Shutdown")
+                }
+            },
             defaultSuccess: function (rs) {
                 console.log(rs);
+            },
+            onMute: function () {
+                var _this = this;
+                _this.muted = !this.muted;
+                _this.exec("Application.SetMute", {mute: _this.muted})
             },
             onError: function (rs) {
                 var _this = this;
@@ -234,6 +246,7 @@
                     if (!rs.error) {
                         _this.volume = rs.result.volume;
                         _this.version = rs.result.version;
+                        _this.muted = rs.result.muted;
                     }
                 });
                 _this.exec("PVR.GetChannels", {"channelgroupid": 1}, function (rs) {
