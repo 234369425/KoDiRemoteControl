@@ -7,6 +7,6 @@
 - 支持音量控制
 - PRV频道直接选择
 
-![跳转试用地址](http://kc.eastapple.com "在线试用地址")
+[跳转试用地址](http://kc.eastapple.com "在线试用地址")
 
 ![遥控器展示](https://github.com/234369425/KoDiRemoteControl/blob/master/doc/img/control.PNG)
