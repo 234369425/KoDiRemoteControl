@@ -44,10 +44,22 @@
             KoDi: V{{version.major+'.'+version.minor}} Aladdin&nbsp;&nbsp;
         </b>
     </div>
-    <div v-if="changeVisible" class="alert alert-warning" role="alert">
-        连接服务器失败！请检查KiDo状态或者host port是否正确!<br/>
-        Host Port: <input @blur="ping" v-model="host"/>
-        <button @click="ping">Retry</button>
+    <div v-if="changeVisible" style="font-size:large" class="alert alert-warning" role="alert">
+        <div class="row">
+            <div class="col-xs-12">
+                连接服务器失败！请检查KiDo状态或者host port是否正确!<br/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="input-group">
+                    <input @blur="ping" v-model="host"/>
+                    <span class="input-group-btn">
+                            <button class="btn btn-sm btn-success" @click="ping">Retry</button>
+                  </span>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="row">
         <div class="col-xs-3">
@@ -235,15 +247,23 @@
                         _this.volume = rs.result.volume;
                         _this.version = rs.result.version;
                     }
-                });
-                _this.exec("PVR.GetChannels", {"channelgroupid": 1}, function (rs) {
-                    var channel = rs.result.channels;
-                    for (var i = 0; i < channel.length; i++) {
-                        channel[i].icon = (function (label) {
-                            return complement_tv_icon(label)
-                        })(channel[i].label);
-                    }
-                    app.channels = channel;
+
+                    _this.exec("PVR.GetChannelGroups", {"channeltype": "tv"}, function (rs) {
+                        var groups = rs.result.channelgroups;
+                        for (var i = 0; i < groups.length; i++) {
+                            _this.exec("PVR.GetChannels", {"channelgroupid": groups[i]['channelgroupid']}, function (rs) {
+                                var channel = rs.result.channels;
+                                for (var i = 0; i < channel.length; i++) {
+                                    channel[i].icon = (function (label) {
+                                        return complement_tv_icon(label)
+                                    })(channel[i].label);
+                                }
+                                for (var i = 0; i < channel.length; i++) {
+                                    _this.channels.push(channel[i]);
+                                }
+                            });
+                        }
+                    });
                 });
             },
             ping: function () {
