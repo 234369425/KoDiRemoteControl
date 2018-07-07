@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <style>
-
         body {
             text-align: center;
             background: radial-gradient(#58914a, rgba(45, 33, 56, 0.99), #2c412b);
@@ -25,14 +24,17 @@
             margin-top: 0.2rem;
         }
 
-        .control-btn {
-            width: 1.8rem;
-            vertical-align: middle;
-            font-size: .6rem;
-            line-height: .2rem;
-            color: yellow;
-            height: 1.2rem;
-            margin: .25rem;
+        .control-area{
+            border-radius: 50%;
+            border:1px dotted yellow;
+        }
+
+        .control-area .full-btn {
+            width: 100%;
+        }
+
+        .control-area .wide-btn {
+            width: 85%;
         }
     </style>
 </head>
@@ -40,8 +42,8 @@
 <body>
 <div class="container" id="main">
     <div class="row text-right">
-        <b style="font-family: 'STXingkai';font-size:large;color:orange">
-            KoDi: V{{version.major+'.'+version.minor}} Aladdin&nbsp;&nbsp;
+        <b style="font-family: 'STXingkai';font-size:large;color:lightgreen">
+            KoDi: V{{version.major+'.'+version.minor}} Aladdin{{currentVersion}}&nbsp;&nbsp;
         </b>
     </div>
     <div v-if="changeVisible" style="font-size:large" class="alert alert-warning" role="alert">
@@ -74,36 +76,48 @@
             </button>
         </div>
     </div>
-    <div class="row">
-        <div class="col-xs-3 col-xs-offset-4">
-            <button class=" control-btn btn btn-success" @click="exec('Input.Up')">
-                <i class="glyphicon glyphicon-triangle-top"></i>
-            </button>
+    <div class="control-area">
+        <div class="row">
+            <div class="col-xs-4 col-xs-offset-4">
+                <button class="btn btn-lg btn-success wide-btn"
+                        style="border-radius:1rem 1rem 0 0;margin-bottom:0.6rem;margin-top:0.3rem;"
+                        @click="exec('Input.Up')">
+                    <i class="glyphicon glyphicon-triangle-top"></i>
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-3 col-xs-offset-1 text-right">
+                <button class="btn btn-lg btn-success full-btn"
+                        style="border-radius:50% 0 0 50%"
+                        @click="exec('Input.Left')">
+                    <i class="glyphicon glyphicon-triangle-left"></i>
+                </button>
+            </div>
+            <div class="col-xs-4">
+                <button class="btn btn-lg btn-warning wide-btn"
+                        style="border-radius:1rem;"
+                        @click="exec('Input.Select')">&bigcirc;
+                </button>
+            </div>
+            <div class="col-xs-3 text-left">
+                <button class="btn btn-lg btn-success full-btn"
+                        style="border-radius:0 50% 50% 0"
+                        @click="exec('Input.Right')">
+                    <i class="glyphicon glyphicon-triangle-right"></i>
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-4 col-xs-offset-4">
+                <button class="btn btn-lg btn-success wide-btn"
+                        style="border-radius:0 0 1rem 1rem;margin-top:0.6rem;margin-bottom:0.3rem;"
+                        @click="exec('Input.Down')">
+                    <i class="glyphicon glyphicon-triangle-bottom"></i>
+                </button>
+            </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-xs-3 col-xs-offset-1 right">
-            <button class="control-btn btn btn-success" @click="exec('Input.Left')">
-                <i class="glyphicon glyphicon-triangle-left"></i>
-            </button>
-        </div>
-        <div class="col-xs-3">
-            <button class=" control-btn btn btn-warning" @click="exec('Input.Select')">&bigcirc;</button>
-        </div>
-        <div class="col-xs-3 left">
-            <button class=" control-btn btn btn-success" @click="exec('Input.Right')">
-                <i class="glyphicon glyphicon-triangle-right"></i>
-            </button>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-xs-3 col-xs-offset-4">
-            <button class=" control-btn btn btn-success" @click="exec('Input.Down')">
-                <i class="glyphicon glyphicon-triangle-bottom"></i>
-            </button>
-        </div>
-    </div>
-
     <div class="row">
         <div class="col-xs-3">
             <button class="btn btn-lg btn-primary" @click="exec('Input.ContextMenu')">
@@ -111,7 +125,7 @@
             </button>
         </div>
         <div class="col-xs-3 col-xs-offset-6 text-center">
-            <button class="btn btn-lg btn-primary" @click="exec('Input.Back')">
+            <button class="btn btn-lg btn-primary " @click="exec('Input.Back')">
                 <i class="glyphicon glyphicon-share-alt"></i>
             </button>
         </div>
@@ -155,7 +169,7 @@
             </div>
         </div>
     </div>
-s
+    s
 </div>
 </body>
 <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
@@ -175,6 +189,7 @@ s
             requestLocked: false,
             changeVisible: false,
             muted: false,
+            currentVersion: ' v 1.1',
             host: "172.168.1.2:8080"
         },
         methods: {
