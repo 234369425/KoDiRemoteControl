@@ -1,6 +1,4 @@
-
-
-var __img_host__ = "http://pb47lh0dj.bkt.clouddn.com/tvlogo/"
+var __img_host__ = "http://pb47lh0dj.bkt.clouddn.com/tvlogo/";
 
 var __cctv__ = {
     "11": "cctv11",
