@@ -212,9 +212,7 @@
             onError: function (rs) {
                 var _this = this;
                 _this.requestLocked = false;
-                if (rs.statusText === "timeout") {
-                    _this.changeVisible = true;
-                }
+                _this.changeVisible = true;
             },
             exec: function (method, params, fn) {
                 var _this = this;
